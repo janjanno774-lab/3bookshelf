@@ -1,0 +1,162 @@
+{% extends 'books/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* カードのデザインをスタイリッシュに */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .img-fluid {
+        border-radius: 12px 0 0 12px;
+        height: 100%;
+        object-fit: cover;
+    }
+    /* ボタンのアイコンとスタイル */
+    .btn-custom {
+        border: 2px solid;
+        border-radius: 50px;
+        transition: background-color 0.3s, color 0.3s;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-custom.read {
+        color: #198754;
+        border-color: #198754;
+    }
+    .btn-custom.reading {
+        color: #ffc107;
+        border-color: #ffc107;
+    }
+    .btn-custom.wishlist {
+        color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+    .btn-custom:hover {
+        color: white;
+    }
+    .btn-custom.read:hover {
+        background-color: #198754;
+    }
+    .btn-custom.reading:hover {
+        background-color: #ffc107;
+    }
+    .btn-custom.wishlist:hover {
+        background-color: #0dcaf0;
+    }
+    .btn-icon {
+        margin-right: 8px;
+    }
+    /* フォームのスタイル */
+    .input-group .form-control {
+        border-radius: 50px 0 0 50px;
+    }
+    .input-group .btn {
+        border-radius: 0 50px 50px 0;
+    }
+    
+    /* ★ 修正点: 追加済み（無効化）ボタンのスタイル */
+    .btn-custom:disabled {
+        color: white;
+        opacity: 0.6;
+    }
+    .btn-custom.read:disabled {
+        background-color: #198754;
+    }
+    .btn-custom.reading:disabled {
+        background-color: #ffc107;
+    }
+    .btn-custom.wishlist:disabled {
+        background-color: #0dcaf0;
+    }
+</style>
+
+    <h1 class="mb-4 text-center fw-bold">本を検索</h1>
+    <form method="get" action="{% url 'search' %}" class="mb-5 d-flex justify-content-center">
+        <div class="input-group" style="max-width: 600px;">
+            <input type="text" class="form-control" name="q" placeholder="本のタイトルや著者名を入力..." value="{{ query }}">
+            <button class="btn btn-primary" type="submit">検索</button>
+        </div>
+    </form>
+
+    {% if books %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for book in books %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="row g-0">
+                            <div class="col-md-4 d-flex align-items-center justify-content-center p-3">
+                                {% if book.thumbnail_url %}
+                                    <img src="{{ book.thumbnail_url }}" class="img-fluid" alt="{{ book.title }}">
+                                {% else %}
+                                    <img src="{% static 'books/no_image.png' %}" class="img-fluid" alt="No image available">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">{{ book.title }}</h5>
+                                    <p class="card-text text-muted">{{ book.author }}</p>
+                                    <form class="add-book-form mt-3">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="isbn" value="{{ book.isbn }}">
+                                        <input type="hidden" name="title" value="{{ book.title }}">
+                                        <input type="hidden" name="author" value="{{ book.author }}">
+                                        <input type="hidden" name="thumbnail_url" value="{{ book.thumbnail_url }}">
+                                        <div class="d-grid gap-2">
+                                            {% if book.registered_status == 'read' %}
+                                                <button type="button" class="btn btn-custom read btn-sm add-book-btn" data-status="read" disabled>
+                                                    <i class="fas fa-check-circle btn-icon"></i>読んだ本に追加済み
+                                                </button>
+                                            {% else %}
+                                                <button type="button" class="btn btn-custom read btn-sm add-book-btn" data-status="read">
+                                                    <i class="fas fa-check-circle btn-icon"></i>読んだ本に追加
+                                                </button>
+                                            {% endif %}
+                                            
+                                            {% if book.registered_status == 'reading' %}
+                                                <button type="button" class="btn btn-custom reading btn-sm add-book-btn" data-status="reading" disabled>
+                                                    <i class="fas fa-bookmark btn-icon"></i>積読に追加済み
+                                                </button>
+                                            {% else %}
+                                                <button type="button" class="btn btn-custom reading btn-sm add-book-btn" data-status="reading">
+                                                    <i class="fas fa-bookmark btn-icon"></i>積読に追加
+                                                </button>
+                                            {% endif %}
+                                            
+                                            {% if book.registered_status == 'wishlist' %}
+                                                <button type="button" class="btn btn-custom wishlist btn-sm add-book-btn" data-status="wishlist" disabled>
+                                                    <i class="fas fa-heart btn-icon"></i>読みたいに追加済み
+                                                </button>
+                                            {% else %}
+                                                <button type="button" class="btn btn-custom wishlist btn-sm add-book-btn" data-status="wishlist">
+                                                    <i class="fas fa-heart btn-icon"></i>読みたいに追加
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% elif query %}
+        <p class="text-center mt-5">「{{ query }}」に一致する本は見つかりませんでした。別のキーワードでお試しください。</p>
+    {% endif %}
+{% endblock %}
+
+{% block extra_script %}
+{% endblock %}

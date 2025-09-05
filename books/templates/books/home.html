@@ -1,0 +1,58 @@
+{% extends 'books/base.html' %}
+{% load static %}
+
+{% block content %}
+    <h1>本棚</h1>
+    <div class="row mb-3">
+        <div class="col-12 text-end">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    並び替え
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item {% if current_sort == 'added_date' %}active{% endif %}" href="{% url 'home' %}?sort=added_at">追加日順</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'title' %}active{% endif %}" href="{% url 'home' %}?sort=title">タイトル順</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'author' %}active{% endif %}" href="{% url 'home' %}?sort=author">著者名順</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <h2>読んだ本</h2>
+    <div class="row">
+        {% for user_book in read_books %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                <div class="card h-100">
+                    <a href="{% url 'book_detail' user_book.id %}" class="text-decoration-none text-dark">
+                        <img src="{{ user_book.book.thumbnail_url }}" class="card-img-top" alt="{{ user_book.book.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ user_book.book.title }}</h5>
+                            <p class="card-text">{{ user_book.book.author }}</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <p>読んだ本はまだありません。</p>
+        {% endfor %}
+    </div>
+    
+    <h2>積読</h2>
+    <div class="row">
+        {% for user_book in reading_books %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                <div class="card h-100">
+                    <a href="{% url 'book_detail' user_book.id %}" class="text-decoration-none text-dark">
+                        <img src="{{ user_book.book.thumbnail_url }}" class="card-img-top" alt="{{ user_book.book.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ user_book.book.title }}</h5>
+                            <p class="card-text">{{ user_book.book.author }}</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <p>積読の本はまだありません。</p>
+        {% endfor %}
+    </div>
+{% endblock %}

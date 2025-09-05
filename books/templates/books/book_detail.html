@@ -1,0 +1,96 @@
+{% extends 'books/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 text-center">
+        {% if book.thumbnail_url %}
+            <img src="{{ book.thumbnail_url }}" alt="{{ book.title }}" class="img-fluid rounded mb-3 shadow">
+        {% else %}
+            <img src="{% static 'books/no_image.png' %}" alt="No image available" class="img-fluid rounded mb-3 shadow">
+        {% endif %}
+        <h2 class="fw-bold">{{ book.title }}</h2>
+        <p class="text-muted">{{ book.author }}</p>
+
+        <a href="{% url 'delete_book' user_book.pk %}" class="btn btn-danger mt-3" onclick="return confirm('本当にこの本を本棚から削除しますか？');">
+            本棚から削除
+        </a>
+    </div>
+    <div class="col-md-8">
+        <h3>本の情報</h3>
+        <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+        <p><strong>ステータス:</strong> {{ user_book.get_status_display }}</p>
+        <p><strong>追加日:</strong> {{ user_book.added_at|date:"Y年m月d日" }}</p>
+
+        <hr>
+        <h4>あらすじ</h4>
+        <p>{{ book.description|default:"あらすじがありません。" }}</p>
+    </div>
+</div>
+
+<hr class="my-5">
+
+<h3>同じ著者の未登録の本</h3>
+{% if related_books %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for related_book in related_books %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="row g-0">
+                        <div class="col-md-4 d-flex align-items-center justify-content-center p-3">
+                            {% if related_book.thumbnail_url %}
+                                <img src="{{ related_book.thumbnail_url }}" class="img-fluid" alt="{{ related_book.title }}">
+                            {% else %}
+                                <img src="{% static 'books/no_image.png' %}" class="img-fluid" alt="No image available">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">{{ related_book.title }}</h5>
+                                <p class="card-text text-muted">{{ related_book.author }}</p>
+                                <form class="add-book-form mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="isbn" value="{{ related_book.isbn }}">
+                                    <input type="hidden" name="title" value="{{ related_book.title }}">
+                                    <input type="hidden" name="author" value="{{ related_book.author }}">
+                                    <input type="hidden" name="thumbnail_url" value="{{ related_book.thumbnail_url }}">
+                                    <div class="d-grid gap-2">
+                                        {% if related_book.registered_status %}
+                                            <button type="button" class="btn btn-custom btn-sm add-book-btn" 
+                                                    data-status="{{ related_book.registered_status }}" disabled>
+                                                {% if related_book.registered_status == 'read' %}
+                                                    <i class="fas fa-check-circle btn-icon"></i>読んだ本に追加済み
+                                                {% elif related_book.registered_status == 'reading' %}
+                                                    <i class="fas fa-bookmark btn-icon"></i>積読に追加済み
+                                                {% elif related_book.registered_status == 'wishlist' %}
+                                                    <i class="fas fa-heart btn-icon"></i>読みたいに追加済み
+                                                {% endif %}
+                                            </button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-custom read btn-sm add-book-btn" data-status="read">
+                                                <i class="fas fa-check-circle btn-icon"></i>読んだ本に追加
+                                            </button>
+                                            <button type="button" class="btn btn-custom reading btn-sm add-book-btn" data-status="reading">
+                                                <i class="fas fa-bookmark btn-icon"></i>積読に追加
+                                            </button>
+                                            <button type="button" class="btn btn-custom wishlist btn-sm add-book-btn" data-status="wishlist">
+                                                <i class="fas fa-heart btn-icon"></i>読みたいに追加
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>同じ著者の未登録の本は見つかりませんでした。</p>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_script %}
+{% endblock %}

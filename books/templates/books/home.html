@@ -2,39 +2,6 @@
 {% load static %}
 
 {% block content %}
-<style>
-    .book-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
-        height: 100%;
-    }
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-    .book-card-img {
-        aspect-ratio: 2 / 3;
-        object-fit: contain;
-        background-color: #f8f9fa;
-        border-radius: 12px 12px 0 0;
-    }
-    .card-title {
-        font-weight: bold;
-        font-size: 0.9rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 2.7rem; /* 2行分の高さを確保 */
-    }
-    .card-text {
-        font-size: 0.8rem;
-        color: #6c757d;
-    }
-</style>
-
     <h1>本棚</h1>
     <div class="row mb-3">
         <div class="col-12 text-end">
@@ -52,16 +19,12 @@
     </div>
     
     <h2>読んだ本</h2>
-    <div class="row g-4">
+    <div class="row">
         {% for user_book in read_books %}
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="card book-card">
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                <div class="card h-100">
                     <a href="{% url 'book_detail' user_book.id %}" class="text-decoration-none text-dark">
-                        {% if user_book.book.thumbnail_url %}
-                            <img src="{{ user_book.book.thumbnail_url }}" class="book-card-img" alt="{{ user_book.book.title }}">
-                        {% else %}
-                            <img src="{% static 'books/no_image.png' %}" class="book-card-img" alt="No image available">
-                        {% endif %}
+                        <img src="{{ user_book.book.thumbnail_url }}" class="card-img-top" alt="{{ user_book.book.title }}">
                         <div class="card-body">
                             <h5 class="card-title">{{ user_book.book.title }}</h5>
                             <p class="card-text">{{ user_book.book.author }}</p>
@@ -74,17 +37,13 @@
         {% endfor %}
     </div>
     
-    <h2 class="mt-5">積読</h2>
-    <div class="row g-4">
+    <h2>積読</h2>
+    <div class="row">
         {% for user_book in reading_books %}
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="card book-card">
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                <div class="card h-100">
                     <a href="{% url 'book_detail' user_book.id %}" class="text-decoration-none text-dark">
-                        {% if user_book.book.thumbnail_url %}
-                            <img src="{{ user_book.book.thumbnail_url }}" class="book-card-img" alt="{{ user_book.book.title }}">
-                        {% else %}
-                            <img src="{% static 'books/no_image.png' %}" class="book-card-img" alt="No image available">
-                        {% endif %}
+                        <img src="{{ user_book.book.thumbnail_url }}" class="card-img-top" alt="{{ user_book.book.title }}">
                         <div class="card-body">
                             <h5 class="card-title">{{ user_book.book.title }}</h5>
                             <p class="card-text">{{ user_book.book.author }}</p>

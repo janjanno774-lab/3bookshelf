@@ -68,12 +68,17 @@ def search(request):
                 registered_books_status[user_book.book.isbn] = user_book.status
 
     if query:
-        api_url = f"https://www.googleapis.com/books/v1/volumes?q=inauthor:{query}&maxResults=40&orderBy=relevance"
+        # Add language and country parameters for better accuracy
+        params = "&maxResults=40&orderBy=relevance&langRestrict=ja&country=JP"
+        
+        # First, try searching with the 'inauthor' qualifier
+        api_url = f"https://www.googleapis.com/books/v1/volumes?q=inauthor:{query}{params}"
         response = requests.get(api_url, timeout=5)
         data = response.json()
         
+        # If the author search yields no results, fall back to a general query
         if not data.get('items', []):
-            api_url = f"https://www.googleapis.com/books/v1/volumes?q={query}&maxResults=40&orderBy=relevance"
+            api_url = f"https://www.googleapis.com/books/v1/volumes?q={query}{params}"
             response = requests.get(api_url, timeout=5)
             data = response.json()
             
@@ -82,6 +87,10 @@ def search(request):
 
             for item in data.get('items', []):
                 volume_info = item.get('volumeInfo', {})
+                # Skip books that are not mainly in Japanese
+                if volume_info.get('language') != 'ja':
+                    continue
+
                 industry_identifiers = volume_info.get('industryIdentifiers', [])
                 
                 isbn = 'N/A'
